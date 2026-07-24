@@ -7,10 +7,47 @@ return {
 			"nvim-neotest/nvim-nio",
 			"theHamsta/nvim-dap-virtual-text",
 			"jay-babu/mason-nvim-dap.nvim",
+			{
+				"Joakker/lua-json5",
+				lazy = true,
+			},
 		},
 
 		config = function()
 			local dap = require("dap")
+
+			pcall(function()
+				require("dap.ext.vscode").load_launchjs(nil, {
+					["pwa-node"] = {
+						"javascript",
+						"typescript",
+					},
+					["pwa-chrome"] = {
+						"javascriptreact",
+						"typescriptreact",
+					},
+					["coreclr"] = {
+						"cs",
+					},
+				})
+			end)
+
+			local function find_dotnet_dll()
+				local cwd = vim.fn.getcwd()
+
+				local dlls = vim.fn.glob(cwd .. "/bin/Debug/net*/*.dll", false, true)
+
+				if #dlls == 0 then
+					vim.notify("No DLL found. Run dotnet build first.", vim.log.levels.ERROR)
+					return nil
+				end
+
+				if #dlls == 1 then
+					return dlls[1]
+				end
+
+				return vim.fn.input("DLL: ", dlls[1], "file")
+			end
 
 			dap.adapters.coreclr = {
 				type = "executable",
@@ -22,12 +59,8 @@ return {
 				{
 					type = "coreclr",
 					name = "Launch .NET",
-
 					request = "launch",
-
-					program = function()
-						return vim.fn.input("Path to dll: ", vim.fn.getcwd() .. "/bin/Debug/", "file")
-					end,
+					program = find_dotnet_dll,
 				},
 			}
 
