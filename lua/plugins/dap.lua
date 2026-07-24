@@ -1,0 +1,75 @@
+return {
+	{
+		"mfussenegger/nvim-dap",
+
+		dependencies = {
+			"rcarriga/nvim-dap-ui",
+			"nvim-neotest/nvim-nio",
+			"theHamsta/nvim-dap-virtual-text",
+			"jay-babu/mason-nvim-dap.nvim",
+		},
+
+		config = function()
+			local dap = require("dap")
+
+			dap.adapters.coreclr = {
+				type = "executable",
+				command = vim.fn.stdpath("data") .. "/mason/bin/netcoredbg",
+				args = { "--interpreter=vscode" },
+			}
+
+			dap.configurations.cs = {
+				{
+					type = "coreclr",
+					name = "Launch .NET",
+
+					request = "launch",
+
+					program = function()
+						return vim.fn.input("Path to dll: ", vim.fn.getcwd() .. "/bin/Debug/", "file")
+					end,
+				},
+			}
+
+			dap.configurations.fsharp = dap.configurations.cs
+			dap.configurations.vb = dap.configurations.cs
+
+			local dapui = require("dapui")
+
+			require("dapui").setup()
+
+			require("nvim-dap-virtual-text").setup()
+
+			require("mason-nvim-dap").setup({
+				automatic_installation = true,
+			})
+
+			dap.listeners.before.attach.dapui_config = function()
+				dapui.open()
+			end
+
+			dap.listeners.before.launch.dapui_config = function()
+				dapui.open()
+			end
+
+			dap.listeners.before.event_terminated.dapui_config = function()
+				dapui.close()
+			end
+
+			dap.listeners.before.event_exited.dapui_config = function()
+				dapui.close()
+			end
+
+			local map = vim.keymap.set
+
+			map("n", "<F5>", dap.continue)
+			map("n", "<F10>", dap.step_over)
+			map("n", "<F11>", dap.step_into)
+			map("n", "<F12>", dap.step_out)
+
+			map("n", "<leader>b", dap.toggle_breakpoint)
+			map("n", "<leader>dr", dap.repl.open)
+			map("n", "<leader>du", dapui.toggle)
+		end,
+	},
+}
