@@ -34,6 +34,44 @@ return {
 			dap.configurations.fsharp = dap.configurations.cs
 			dap.configurations.vb = dap.configurations.cs
 
+			dap.adapters["pwa-node"] = {
+				type = "server",
+				host = "127.0.0.1",
+				port = "${port}",
+				executable = {
+					command = "node",
+					args = {
+						vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
+						"${port}",
+						"127.0.0.1",
+					},
+				},
+			}
+
+			for _, language in ipairs({
+				"javascript",
+				"typescript",
+				"javascriptreact",
+				"typescriptreact",
+			}) do
+				dap.configurations[language] = {
+					{
+						type = "pwa-node",
+						request = "launch",
+						name = "Launch current file",
+						program = "${file}",
+						cwd = "${workspaceFolder}",
+					},
+					{
+						type = "pwa-node",
+						request = "attach",
+						name = "Attach",
+						processId = require("dap.utils").pick_process,
+						cwd = "${workspaceFolder}",
+					},
+				}
+			end
+
 			local dapui = require("dapui")
 
 			require("dapui").setup()
