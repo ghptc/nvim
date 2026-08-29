@@ -16,6 +16,15 @@ return {
 		config = function()
 			local dap = require("dap")
 
+			dap.adapters.cppdbg = {
+				type = "executable",
+				command = "gdb",
+				args = {
+					"-i",
+					"dap",
+				},
+			}
+
 			pcall(function()
 				require("dap.ext.vscode").load_launchjs(nil, {
 					["pwa-node"] = {
