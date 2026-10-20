@@ -22,6 +22,8 @@ return {
 				"sql",
 				"dockerfile",
 				"c_sharp",
+				"c",
+				"cpp",
 				"markdown",
 				"markdown_inline",
 				"gitignore",
@@ -45,11 +47,14 @@ return {
 					"sql",
 					"dockerfile",
 					"cs",
+					"c",
+					"cpp",
 					"markdown",
 					"gitignore",
 				},
 				callback = function()
-					vim.treesitter.start()
+					-- Parsers may still be installing on the first launch.
+					pcall(vim.treesitter.start)
 				end,
 			})
 
@@ -69,6 +74,8 @@ return {
 					"sql",
 					"dockerfile",
 					"cs",
+					"c",
+					"cpp",
 					"markdown",
 					"gitignore",
 				},

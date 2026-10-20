@@ -3,10 +3,10 @@ return {
 		"mfussenegger/nvim-dap",
 
 		dependencies = {
-			"rcarriga/nvim-dap-ui",
-			"nvim-neotest/nvim-nio",
+			{ "rcarriga/nvim-dap-ui", dependencies = { "nvim-neotest/nvim-nio" } },
 			"theHamsta/nvim-dap-virtual-text",
 			"jay-babu/mason-nvim-dap.nvim",
+			"williamboman/mason.nvim",
 			{
 				"Joakker/lua-json5",
 				lazy = true,
@@ -25,39 +25,6 @@ return {
 				},
 			}
 
-			pcall(function()
-				require("dap.ext.vscode").load_launchjs(nil, {
-					["pwa-node"] = {
-						"javascript",
-						"typescript",
-					},
-					["pwa-chrome"] = {
-						"javascriptreact",
-						"typescriptreact",
-					},
-					["coreclr"] = {
-						"cs",
-					},
-				})
-			end)
-
-			local function find_dotnet_dll()
-				local cwd = vim.fn.getcwd()
-
-				local dlls = vim.fn.glob(cwd .. "/bin/Debug/net*/*.dll", false, true)
-
-				if #dlls == 0 then
-					vim.notify("No DLL found. Run dotnet build first.", vim.log.levels.ERROR)
-					return nil
-				end
-
-				if #dlls == 1 then
-					return dlls[1]
-				end
-
-				return vim.fn.input("DLL: ", dlls[1], "file")
-			end
-
 			dap.adapters.coreclr = {
 				type = "executable",
 				command = vim.fn.stdpath("data") .. "/mason/bin/netcoredbg",
@@ -65,12 +32,16 @@ return {
 			}
 
 			dap.configurations.cs = {
-				{
+				setmetatable({
 					type = "coreclr",
 					name = "Launch .NET",
 					request = "launch",
-					program = find_dotnet_dll,
-				},
+					stopAtEntry = false,
+				}, {
+					__call = function(config)
+						return require("config.dotnet").debug_config(config)
+					end,
+				}),
 			}
 
 			dap.configurations.fsharp = dap.configurations.cs
@@ -121,7 +92,16 @@ return {
 			require("nvim-dap-virtual-text").setup()
 
 			require("mason-nvim-dap").setup({
-				automatic_installation = true,
+				ensure_installed = { "coreclr" },
+				automatic_installation = false,
+			})
+
+			-- launch.json is read on demand by nvim-dap; retain adapter/filetype mappings.
+			local vscode = require("dap.ext.vscode")
+			vscode.type_to_filetypes = vim.tbl_extend("force", vscode.type_to_filetypes, {
+				["pwa-node"] = { "javascript", "typescript" },
+				["pwa-chrome"] = { "javascriptreact", "typescriptreact" },
+				coreclr = { "cs", "fsharp", "vb" },
 			})
 
 			dap.listeners.before.attach.dapui_config = function()

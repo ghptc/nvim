@@ -7,6 +7,8 @@ return {
 		opts = {
 			formatters_by_ft = {
 				lua = { "stylua" },
+				-- Roslyn owns C# formatting; no second formatter or process per save.
+				cs = { lsp_format = "prefer" },
 
 				javascript = { "prettier" },
 				javascriptreact = { "prettier" },
