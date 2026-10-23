@@ -4,6 +4,9 @@ return {
 
 		event = "InsertEnter",
 
-		opts = {},
+		opts = {
+            map_cr = true,
+            map_bs = true,
+        },
 	},
 }
