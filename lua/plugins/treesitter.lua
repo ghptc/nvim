@@ -58,31 +58,6 @@ return {
 				end,
 			})
 
-			vim.api.nvim_create_autocmd("FileType", {
-				pattern = {
-					"lua",
-					"vim",
-					"vimdoc",
-					"bash",
-					"javascript",
-					"typescript",
-					"typescriptreact",
-					"html",
-					"css",
-					"json",
-					"yaml",
-					"sql",
-					"dockerfile",
-					"cs",
-					"c",
-					"cpp",
-					"markdown",
-					"gitignore",
-				},
-				callback = function()
-					vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-				end,
-			})
 		end,
 	},
 }
