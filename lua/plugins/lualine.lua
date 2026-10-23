@@ -8,7 +8,7 @@ return {
 
 		opts = {
 			options = {
-				theme = "moonfly",
+				theme = "vscode",
 				globalstatus = true,
 				component_separators = "",
 				section_separators = "",
